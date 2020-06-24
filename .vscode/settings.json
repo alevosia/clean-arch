@@ -1,0 +1,25 @@
+{
+	// automatically run ESLint's automatic fix command (i.e. eslint --fix) whenever a file is saved
+	// this will make ESLint both our linter and formatter
+	"editor.codeActionsOnSave": {
+		"source.fixAll.eslint": true
+	},
+	// set the languages that ESLint should validate
+	"eslint.validate": ["javascript", "javascriptreact", "typescript", "typescriptreact"],
+
+	// if you have formatOnSave set to true on your settings.json,
+	// disable formatOnSave for JavaScript and TypeScript files
+	// to prevent running 2 formatting commands (ESLint and Prettier) on save
+	"[javascript]": {
+		"editor.formatOnSave": false
+	},
+	"[javascriptreact]": {
+		"editor.formatOnSave": false
+	},
+	"[typescript]": {
+		"editor.formatOnSave": false
+	},
+	"[typescriptreact]": {
+		"editor.formatOnSave": false
+	}
+}
