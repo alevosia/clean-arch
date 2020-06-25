@@ -25,6 +25,10 @@ if (process.env.NODE_ENV !== 'production') {
 
 app.use(express.json())
 
+app.get('/', (_, res) => {
+    res.sendStatus(200)
+})
+
 app.all('/movies', moviesController)
 app.all('/movies/:id', moviesController)
 
@@ -64,6 +68,7 @@ connectDb()
         console.log(`Models: ${Object.keys(connection.models)}`)
 
         app.listen(PORT, () => {
+            console.log(`NODE_ENV: ${process.env.NODE_ENV}`)
             console.log(`App is now listening to port: ${PORT}`)
         })
     })
