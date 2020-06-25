@@ -9,7 +9,9 @@
 		"build": "tsc",
 		"start": "node build/index.ts",
 		"lint": "eslint .",
-		"lint:fix": "eslint . --fix"
+		"lint:fix": "eslint . --fix",
+		"delete:build": "rimraf build",
+		"prebuild": "npm run delete:build"
 	},
 	"keywords": [],
 	"author": "Alevosia",
@@ -26,6 +28,7 @@
 		"eslint-plugin-prettier": "^3.1.4",
 		"nodemon": "^2.0.4",
 		"prettier": "^2.0.5",
+		"rimraf": "^3.0.2",
 		"ts-node": "^8.10.2",
 		"typescript": "^3.9.5"
 	},
