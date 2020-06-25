@@ -3,6 +3,11 @@ import { connectDb } from './db/index'
 import handleMoviesRequest from './movies'
 import adaptRequest from './helpers/adapt-request'
 import makeHttpError from './helpers/http-error'
+import dotenv from 'dotenv'
+
+if (process.env.NODE_ENV !== 'production') {
+    dotenv.config()
+}
 
 const PORT = process.env.PORT || 5000
 const app = express()

@@ -7,8 +7,6 @@ export default function makeMovie(movieInfo: Params): Movie {
     return Object.freeze(validMovie)
 
     function validateMovie({ id, title, plot, releasedAt }: Params): Movie {
-        console.log(title, plot, releasedAt)
-
         // title
         if (title === undefined) {
             throw new Error('Movie title is required.')
