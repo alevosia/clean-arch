@@ -1,13 +1,12 @@
 {
-	"name": "typescript-project-template",
+	"name": "clean-arch",
 	"version": "0.0.1",
-	"description": "Pre-configured TypeScript project that includes ESLint and Prettier.",
+	"description": "A playground for learning clean architecture",
 	"main": "src/app.ts",
-	"type": "module",
 	"scripts": {
-		"dev": "env PORT=3000 nodemon src/index.ts",
+		"dev": "nodemon src/index.ts",
 		"build": "tsc",
-		"start": "node build/index.ts",
+		"start": "env NODE_ENV=production node build/index.js",
 		"lint": "eslint .",
 		"lint:fix": "eslint . --fix",
 		"delete:build": "rimraf build",
