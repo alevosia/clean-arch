@@ -6,7 +6,8 @@ export async function connectDb(): Promise<void> {
 
     await mongoose.connect(url, {
         useNewUrlParser: true,
-        useUnifiedTopology: true
+        useUnifiedTopology: true,
+        connectTimeoutMS: 15000
     })
 
     mongoose.connection.useDb(dbName)
