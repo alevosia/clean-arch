@@ -9,10 +9,11 @@ export default function makeMovieList({ movieModel }: MakeMovieListParams): Movi
     return Object.freeze({
         findById,
         getItems,
-        addItem
+        addItem,
+        removeItem
     })
 
-    async function findById({ movieId }: GetItemParams): Promise<Movie | null> {
+    async function findById({ movieId }: FindByIdParams): Promise<Movie | null> {
         const found = await movieModel.findById(movieId)
 
         if (found) {
@@ -30,43 +31,69 @@ export default function makeMovieList({ movieModel }: MakeMovieListParams): Movi
 
     async function addItem(movie: Movie): Promise<AddItemResult> {
         const _id = mongoose.Types.ObjectId()
-        const result = await movieModel.create({ _id, ...movie })
+        const created = await movieModel.create({ _id, ...movie })
         return {
             success: true,
-            created: documentToMovie(result)
+            created: documentToMovie(created)
         }
     }
 
+    async function removeItem({ movieId }: RemoveItemParams): Promise<RemoveItemResult> {
+        const deleted = await movieModel.findByIdAndDelete(movieId)
+
+        if (deleted) {
+            return {
+                success: true,
+                deleted: documentToMovie(deleted)
+            }
+        }
+
+        return {
+            success: false
+        }
+    }
+
+    // convert mongoose document to our Movie entity
     function documentToMovie({ _id, title, plot, releasedAt }: IMovie) {
         return makeMovie({ id: _id.toHexString(), title, plot, releasedAt })
     }
 }
 
-interface MakeMovieListParams {
+export interface MakeMovieListParams {
     movieModel: Model<IMovie>
 }
 
-interface GetItemParams {
+export interface MovieList {
+    findById(params: FindByIdParams): Promise<Movie | null>
+    getItems(params: GetItemsParams): Promise<Movie[]>
+    addItem(params: AddItemParams): Promise<AddItemResult>
+    removeItem(params: RemoveItemParams): Promise<RemoveItemResult>
+}
+
+export interface FindByIdParams {
     movieId: string
 }
 
-interface GetItemsParams {
+export interface GetItemsParams {
     limit?: number
 }
 
-interface AddItemParams {
+export interface AddItemParams {
     title: string
     plot: string
     releasedAt: Date
 }
 
-export interface MovieList {
-    findById(params: GetItemParams): Promise<Movie | null>
-    getItems(params: GetItemsParams): Promise<Movie[]>
-    addItem(params: AddItemParams): Promise<AddItemResult>
+export interface RemoveItemParams {
+    movieId: string
 }
 
 export interface AddItemResult {
     success: boolean
     created: Movie
+}
+
+export interface RemoveItemResult {
+    success: boolean
+    deleted?: Movie
 }

@@ -2,10 +2,7 @@ import { MovieList } from './movie-list'
 import { HTTPRequest, HTTPResponse, HTTPRequestHandler } from '../types/http'
 import makeMovie from './movie'
 import makeHttpError from '../helpers/http-error'
-
-interface Params {
-    movieList: MovieList
-}
+import { DEFAULT_RESPONSE_HEADERS } from './config'
 
 export default function makeMoviesEndpointHandler({ movieList }: Params): HTTPRequestHandler {
     return async function handle(request: HTTPRequest): Promise<HTTPResponse> {
@@ -14,10 +11,12 @@ export default function makeMoviesEndpointHandler({ movieList }: Params): HTTPRe
                 return getMovies(request)
             case 'POST':
                 return addMovie(request)
+            case 'DELETE':
+                return deleteMovie(request)
             default:
                 return makeHttpError({
-                    statusCode: 404,
-                    errorMessage: 'Not found.'
+                    statusCode: 405,
+                    errorMessage: 'Method Not Allowed'
                 })
         }
     }
@@ -26,19 +25,29 @@ export default function makeMoviesEndpointHandler({ movieList }: Params): HTTPRe
         const { id } = request.pathParams
         const { limit } = request.queryParams
 
-        const result = id
-            ? await movieList.findById({ movieId: id })
-            : await movieList.getItems({ limit })
+        try {
+            const result = id
+                ? await movieList.findById({ movieId: id })
+                : await movieList.getItems({ limit })
 
-        const response = {
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            statusCode: 200,
-            data: JSON.stringify(result)
+            if (!result) {
+                return makeHttpError({
+                    statusCode: 404,
+                    errorMessage: 'Movie not found.'
+                })
+            }
+
+            return {
+                headers: DEFAULT_RESPONSE_HEADERS,
+                statusCode: 200,
+                data: JSON.stringify(result)
+            }
+        } catch (err) {
+            return makeHttpError({
+                statusCode: 404,
+                errorMessage: 'Movie not found.'
+            })
         }
-
-        return response
     }
 
     async function addMovie(request: HTTPRequest): Promise<HTTPResponse> {
@@ -52,38 +61,68 @@ export default function makeMoviesEndpointHandler({ movieList }: Params): HTTPRe
         }
 
         // if POST body is a string, try to parse to JSON
-        if (typeof movieInfo.body === 'string') {
+        if (typeof movieInfo === 'string') {
             try {
                 movieInfo = JSON.parse(movieInfo)
             } catch {
-                const response = makeHttpError({
+                return makeHttpError({
                     statusCode: 400,
                     errorMessage: 'Bad request. POST body must be valid JSON.'
                 })
-
-                return response
             }
         }
 
         try {
             const movie = makeMovie(movieInfo)
             const result = await movieList.addItem(movie)
-            const response = {
-                headers: {
-                    'Content-Type': 'application/json'
-                },
+            return {
+                headers: DEFAULT_RESPONSE_HEADERS,
                 statusCode: 201,
                 data: JSON.stringify(result)
             }
-
-            return response
         } catch (error) {
-            const response = makeHttpError({
+            return makeHttpError({
                 statusCode: 400,
                 errorMessage: error.message
             })
-
-            return response
         }
     }
+
+    async function deleteMovie(request: HTTPRequest): Promise<HTTPResponse> {
+        const { id } = request.pathParams
+
+        // The request must have an id parameter
+        if (!id) {
+            return makeHttpError({
+                statusCode: 400,
+                errorMessage: 'Bad request. DELETE request must have an Id parameter.'
+            })
+        }
+
+        try {
+            const result = await movieList.removeItem({ movieId: id })
+
+            if (!result.success) {
+                return makeHttpError({
+                    statusCode: 404,
+                    errorMessage: 'Movie not found.'
+                })
+            }
+
+            return {
+                headers: DEFAULT_RESPONSE_HEADERS,
+                statusCode: 200,
+                data: JSON.stringify(result)
+            }
+        } catch (error) {
+            return makeHttpError({
+                statusCode: 404,
+                errorMessage: 'Movie not found.'
+            })
+        }
+    }
+}
+
+export interface Params {
+    movieList: MovieList
 }

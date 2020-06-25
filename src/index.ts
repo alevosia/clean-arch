@@ -10,11 +10,10 @@ const app = express()
 app.use(express.json())
 
 app.all('/movies', moviesController)
-app.get('/movies/:id', moviesController)
+app.all('/movies/:id', moviesController)
 
-app.use((error: any, _: Request, res: Response, next: NextFunction) => {
-    console.error(error.message)
-
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+app.use((error: any, _: Request, res: Response, _2: NextFunction) => {
     if (error.name === 'SyntaxError') {
         const { headers, statusCode, data } = makeHttpError({
             statusCode: 400,
@@ -23,14 +22,15 @@ app.use((error: any, _: Request, res: Response, next: NextFunction) => {
 
         res.set(headers).status(statusCode).send(data)
     } else {
-        next(error)
+        console.error(error.message)
+        res.sendStatus(500)
     }
 })
 
 function moviesController(req: Request, res: Response) {
     const httpRequest = adaptRequest(req)
 
-    console.log(httpRequest)
+    console.log(httpRequest.method)
 
     handleMoviesRequest(httpRequest)
         .then((httResponse) => {
@@ -40,7 +40,7 @@ function moviesController(req: Request, res: Response) {
         })
         .catch((error) => {
             console.error(error.message)
-            res.status(500).end()
+            res.sendStatus(500)
         })
 }
 

@@ -1,13 +1,6 @@
 import { Movie } from '../types/movie'
 
-interface Params {
-    id: string
-    title: string
-    plot: string
-    releasedAt: Date
-    [k: string]: any
-}
-
+// Movie entity, returns a pure JS object, not dependent to any framework
 export default function makeMovie(movieInfo: Params): Movie {
     const validMovie = validateMovie(movieInfo)
 
@@ -45,4 +38,12 @@ export default function makeMovie(movieInfo: Params): Movie {
 
         return { id, title, plot, releasedAt }
     }
+}
+
+export interface Params {
+    id: string
+    title: string
+    plot: string
+    releasedAt: Date
+    [k: string]: any
 }
