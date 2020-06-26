@@ -9,6 +9,7 @@ import helmet from 'helmet'
 import morgan from 'morgan'
 import { connectDb } from './db/index'
 import handleMoviesRequest from './movies'
+import handleReviewsRequest from './reviews'
 import adaptRequest from './helpers/adapt-request'
 import makeHttpError from './helpers/http-error'
 
@@ -31,6 +32,8 @@ app.get('/', (_, res) => {
 
 app.all('/movies', moviesController)
 app.all('/movies/:id', moviesController)
+app.all('/reviews', reviewsController)
+app.all('/reviews/:id', reviewsController)
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 app.use((error: any, _: Request, res: Response, _2: NextFunction) => {
@@ -50,7 +53,21 @@ app.use((error: any, _: Request, res: Response, _2: NextFunction) => {
 function moviesController(req: Request, res: Response) {
     const httpRequest = adaptRequest(req)
 
-    handleMoviesRequest(httpRequest)
+    handleMoviesRequest({ httpRequest })
+        .then((httResponse) => {
+            const { headers, statusCode, data } = httResponse
+            res.set(headers).status(statusCode).send(data)
+        })
+        .catch((error) => {
+            console.error(error.message)
+            res.sendStatus(500)
+        })
+}
+
+function reviewsController(req: Request, res: Response) {
+    const httpRequest = adaptRequest(req)
+
+    handleReviewsRequest({ httpRequest })
         .then((httResponse) => {
             const { headers, statusCode, data } = httResponse
             res.set(headers).status(statusCode).send(data)
@@ -65,7 +82,7 @@ connectDb()
     .then((connection) => {
         console.log(`Connected to MongoDB: ${connection.host}`)
         console.log(`Database: ${connection.name}`)
-        console.log(`Models: ${Object.keys(connection.models)}`)
+        console.log(`Models: ${Object.keys(connection.models).join(' | ')}`)
 
         app.listen(PORT, () => {
             console.log(`NODE_ENV: ${process.env.NODE_ENV}`)

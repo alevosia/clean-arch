@@ -4,7 +4,8 @@ import { Movie } from '../types/movie'
 import makeMovie from './movie'
 import { DEFAULT_GET_ITEMS_LIMIT } from './config'
 
-// kinda like a repository
+// The Use Cases / Application Business Rules
+// No dependency on the web or any UI
 export default function makeMovieList({ movieModel }: MakeMovieListParams): MovieList {
     return Object.freeze({
         findById,
@@ -39,8 +40,9 @@ export default function makeMovieList({ movieModel }: MakeMovieListParams): Movi
     }
 
     async function removeItem({ movieId }: RemoveItemParams): Promise<RemoveItemResult> {
+        console.log(movieId)
         const deleted = await movieModel.findByIdAndDelete(movieId)
-
+        console.log('AFTER')
         if (deleted) {
             return {
                 success: true,
@@ -55,7 +57,7 @@ export default function makeMovieList({ movieModel }: MakeMovieListParams): Movi
 
     // convert mongoose document to our Movie entity
     function documentToMovie({ _id, title, plot, releasedAt }: IMovie) {
-        return makeMovie({ id: _id.toHexString(), title, plot, releasedAt })
+        return makeMovie({ movieInfo: { id: _id.toHexString(), title, plot, releasedAt } })
     }
 }
 
@@ -91,6 +93,7 @@ export interface RemoveItemParams {
 export interface AddItemResult {
     success: boolean
     created: Movie
+    errorMessage?: string
 }
 
 export interface RemoveItemResult {

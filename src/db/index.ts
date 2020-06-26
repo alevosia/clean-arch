@@ -1,9 +1,8 @@
 import mongoose, { Connection } from 'mongoose'
+import { MONGODB_URL } from './config'
 
 export async function connectDb(): Promise<Connection> {
-    const dbName = 'clean_arch'
-    const url = `mongodb://localhost:27017/${dbName}`
-    await mongoose.connect(url, {
+    await mongoose.connect(MONGODB_URL, {
         useNewUrlParser: true,
         useUnifiedTopology: true,
         connectTimeoutMS: 15000

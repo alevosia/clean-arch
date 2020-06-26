@@ -1,18 +1,23 @@
 import { MovieList } from './movie-list'
-import { HTTPRequest, HTTPResponse, HTTPRequestHandler } from '../types/http'
+import {
+    HTTPRequest,
+    HTTPResponse,
+    HTTPRequestHandler,
+    HTTPRequestHandlerParams
+} from '../types/http'
 import makeMovie from './movie'
 import makeHttpError from '../helpers/http-error'
 import { DEFAULT_RESPONSE_HEADERS } from './config'
 
 export default function makeMoviesEndpointHandler({ movieList }: Params): HTTPRequestHandler {
-    return async function handle(request: HTTPRequest): Promise<HTTPResponse> {
-        switch (request.method) {
+    return async function handle({ httpRequest }: HTTPRequestHandlerParams): Promise<HTTPResponse> {
+        switch (httpRequest.method) {
             case 'GET':
-                return getMovies(request)
+                return getMovies(httpRequest)
             case 'POST':
-                return addMovie(request)
+                return addMovie(httpRequest)
             case 'DELETE':
-                return deleteMovie(request)
+                return deleteMovie(httpRequest)
             default:
                 return makeHttpError({
                     statusCode: 405,
@@ -73,8 +78,16 @@ export default function makeMoviesEndpointHandler({ movieList }: Params): HTTPRe
         }
 
         try {
-            const movie = makeMovie(movieInfo)
+            const movie = makeMovie({ movieInfo })
             const result = await movieList.addItem(movie)
+
+            if (!result.success) {
+                return makeHttpError({
+                    statusCode: 404,
+                    errorMessage: result.errorMessage
+                })
+            }
+
             return {
                 headers: DEFAULT_RESPONSE_HEADERS,
                 statusCode: 201,

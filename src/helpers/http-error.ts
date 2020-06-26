@@ -2,7 +2,7 @@ import { HTTPResponse } from '../types/http'
 
 interface Params {
     statusCode: number
-    errorMessage: string
+    errorMessage?: string
 }
 
 export default function makeHttpError({ statusCode, errorMessage }: Params): HTTPResponse {

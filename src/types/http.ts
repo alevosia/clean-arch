@@ -14,4 +14,8 @@ export interface HTTPResponse {
     data?: string
 }
 
-export type HTTPRequestHandler = (request: HTTPRequest) => Promise<HTTPResponse>
+export interface HTTPRequestHandlerParams {
+    httpRequest: HTTPRequest
+}
+
+export type HTTPRequestHandler = (params: HTTPRequestHandlerParams) => Promise<HTTPResponse>
